@@ -10,9 +10,6 @@ sohbet_gecmisi = []
 # Güncellenmiş cevapları saklamak için bir sözlük
 guncellenmis_cevaplar = {}
 
-# Türkçe dil modeli ile transformers pipeline oluştur
-nlp = pipeline("fill-mask", model="dbmdz/bert-base-turkish-cased")
-
 # Basit bir cevap fonksiyonu
 def cevap_ver(soru):
     soru_lower = soru.lower()
