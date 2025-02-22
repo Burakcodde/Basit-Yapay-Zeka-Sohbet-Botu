@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sohbet Botu</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+      .chat-container {
+        width: 50%;
+        max-width: 600px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .chat-box {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .chat-input {
+        width: calc(100% - 22px);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .chat-button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .history-button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #28a745;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      .train-container {
+        margin-top: 20px;
+      }
+      .train-input {
+        width: calc(100% - 22px);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+      .train-button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #ffc107;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-box" id="chat-box"></div>
+      <input
+        type="text"
+        id="chat-input"
+        class="chat-input"
+        placeholder="Mesajınızı yazın..."
+      />
+      <br /><br />
+      <button id="chat-button" class="chat-button">Gönder</button>
+      <button id="history-button" class="history-button">Geçmişi Göster</button>
+    </div>
+
+    <div class="train-container">
+      <input
+        type="text"
+        id="train-question"
+        class="train-input"
+        placeholder="Soru"
+      />
+      <input
+        type="text"
+        id="train-answer"
+        class="train-input"
+        placeholder="Cevap"
+      />
+      <button id="train-button" class="train-button">Cevabı Güncelle</button>
+    </div>
+
+    <script>
+      document
+        .getElementById("chat-button")
+        .addEventListener("click", function () {
+          var input = document.getElementById("chat-input").value;
+          if (input.trim() !== "") {
+            var chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML +=
+              "<div><strong>Sen:</strong> " + input + "</div>";
+            fetch("/sor", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ soru: input }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                chatBox.innerHTML +=
+                  "<div><strong>Bot:</strong> " + data.cevap + "</div>";
+                chatBox.scrollTop = chatBox.scrollHeight;
+              });
+            document.getElementById("chat-input").value = "";
+          }
+        });
+
+      document
+        .getElementById("history-button")
+        .addEventListener("click", function () {
+          fetch("/gecmis")
+            .then((response) => response.json())
+            .then((data) => {
+              var chatBox = document.getElementById("chat-box");
+              chatBox.innerHTML = "";
+              data.forEach((item) => {
+                chatBox.innerHTML +=
+                  "<div><strong>Sen:</strong> " + item.soru + "</div>";
+                chatBox.innerHTML +=
+                  "<div><strong>Bot:</strong> " + item.cevap + "</div>";
+              });
+              chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        });
+
+      document
+        .getElementById("train-button")
+        .addEventListener("click", function () {
+          var question = document.getElementById("train-question").value;
+          var answer = document.getElementById("train-answer").value;
+          if (question.trim() !== "" && answer.trim() !== "") {
+            fetch("/egit", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ soru: question, cevap: answer }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                alert(data.mesaj);
+              });
+            document.getElementById("train-question").value = "";
+            document.getElementById("train-answer").value = "";
+          }
+        });
+    </script>
+  </body>
+</html>
